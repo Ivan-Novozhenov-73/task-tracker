@@ -52,6 +52,13 @@ func StartCLI() {
 				continue
 			}
 			fmt.Println("Задача успешно удалена")
+		case "update":
+			err := updateTask(cmds_args[1:])
+			if err != nil {
+				fmt.Println("Ошибка:", err)
+				continue
+			}
+			fmt.Println("Задача успешно обнавлена")
 		default:
 			fmt.Printf("Ошибка: неизвестная команда %v\n", cmd)
 			fmt.Println("Для отображения списка команда введите help")
@@ -91,11 +98,10 @@ func fieldsWithQuotes(str string) []string {
 
 func addTask(args []string) (int, error) {
 	if len(args) == 0 || len(args) > 1 {
-		return 0, errors.New("для команды add нужен только один аргумент, заключенный в \"\"")
+		return 0, errors.New("неправильное количество аргументов для команды add")
 	}
 
-	id, err := postTask(args[0])
-	return id, err
+	return postTask(args[0])
 }
 
 func listTasks(args []string) error {
@@ -103,7 +109,7 @@ func listTasks(args []string) error {
 		return errors.New("слишком большое количество аргументов для команды list")
 	}
 
-	var tasks map[int]Task
+	var tasks map[int]*Task
 	var err error
 	if len(args) == 0 {
 		tasks, err = getTasks("")
@@ -151,4 +157,21 @@ func removeTask(args []string) error {
 	}
 
 	return deleteTask(id)
+}
+
+func updateTask(args []string) error {
+	if len(args) == 0 {
+		return errors.New("отсутствует ID и новое описание для задачи")
+	} else if len(args) == 1 {
+		return errors.New("отсутствует новое описание для задачи")
+	} else if len(args) > 2 {
+		return errors.New("слишком большое количество аргументов для команды update")
+	}
+
+	id, err := strconv.Atoi(args[0])
+	if err != nil || id < 1 {
+		return errors.New("ID должен быть целым положительным числом")
+	}
+
+	return putTask(id, args[1])
 }

@@ -44,7 +44,7 @@ func postTask(description string) (int, error) {
 		id++
 	}
 
-	tasks[id] = *newTask(description)
+	tasks[id] = newTask(description)
 
 	err = loadToFile(tasks)
 	if err != nil {
@@ -54,7 +54,7 @@ func postTask(description string) (int, error) {
 	return id, nil
 }
 
-func getTasks(status taskStatus) (map[int]Task, error) {
+func getTasks(status taskStatus) (map[int]*Task, error) {
 	tasks, err := uploadFromFile()
 	if err != nil {
 		return tasks, nil
@@ -62,7 +62,7 @@ func getTasks(status taskStatus) (map[int]Task, error) {
 
 	switch status {
 	case TASK_STATUS_TODO:
-		temp := make(map[int]Task)
+		temp := make(map[int]*Task)
 		for id, task := range tasks {
 			if task.Status == TASK_STATUS_TODO {
 				temp[id] = task
@@ -70,7 +70,7 @@ func getTasks(status taskStatus) (map[int]Task, error) {
 		}
 		return temp, nil
 	case TASK_STATUS_IN_PROGRESS:
-		temp := make(map[int]Task)
+		temp := make(map[int]*Task)
 		for id, task := range tasks {
 			if task.Status == TASK_STATUS_IN_PROGRESS {
 				temp[id] = task
@@ -78,7 +78,7 @@ func getTasks(status taskStatus) (map[int]Task, error) {
 		}
 		return temp, nil
 	case TASK_STATUS_DONE:
-		temp := make(map[int]Task)
+		temp := make(map[int]*Task)
 		for id, task := range tasks {
 			if task.Status == TASK_STATUS_DONE {
 				temp[id] = task
@@ -111,6 +111,27 @@ func deleteTask(id int) error {
 		return fmt.Errorf("задачи с ID(%d) нет", id)
 	}
 	delete(tasks, id)
+
+	err = loadToFile(tasks)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func putTask(id int, description string) error {
+	tasks, err := uploadFromFile()
+	if err != nil {
+		return err
+	}
+
+	if _, ok := tasks[id]; !ok {
+		return fmt.Errorf("задачи с ID(%d) нет", id)
+	}
+
+	tasks[id].Description = description
+	tasks[id].UpdatedAt = time.Now()
 
 	err = loadToFile(tasks)
 	if err != nil {

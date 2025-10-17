@@ -6,8 +6,8 @@ import (
 	"os"
 )
 
-func uploadFromFile() (map[int]Task, error) {
-	tasks := make(map[int]Task)
+func uploadFromFile() (map[int]*Task, error) {
+	tasks := make(map[int]*Task)
 
 	file, err := os.OpenFile("tasks.json", os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
@@ -21,13 +21,13 @@ func uploadFromFile() (map[int]Task, error) {
 	for strID, task := range temp {
 		var intID int
 		fmt.Sscan(strID, &intID)
-		tasks[intID] = task
+		tasks[intID] = &task
 	}
 
 	return tasks, nil
 }
 
-func loadToFile(tasks map[int]Task) error {
+func loadToFile(tasks map[int]*Task) error {
 	file, err := os.Create("tasks.json")
 	if err != nil {
 		return err
