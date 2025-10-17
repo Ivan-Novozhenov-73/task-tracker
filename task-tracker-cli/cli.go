@@ -53,12 +53,26 @@ func StartCLI() {
 			}
 			fmt.Println("Задача успешно удалена")
 		case "update":
-			err := updateTask(cmds_args[1:])
+			err := updateDescriptionTask(cmds_args[1:])
 			if err != nil {
 				fmt.Println("Ошибка:", err)
 				continue
 			}
 			fmt.Println("Задача успешно обнавлена")
+		case "mark-in-progress":
+			err := markAsInProgress(cmds_args[1:])
+			if err != nil {
+				fmt.Println("Ошибка:", err)
+				continue
+			}
+			fmt.Println("Статус задачи успешно обновлен на \"выполняется\"")
+		case "mark-done":
+			err := markAsDone(cmds_args[1:])
+			if err != nil {
+				fmt.Println("Ошибка:", err)
+				continue
+			}
+			fmt.Println("Статус задачи успешно обновлен на \"выполнено\"")
 		default:
 			fmt.Printf("Ошибка: неизвестная команда %v\n", cmd)
 			fmt.Println("Для отображения списка команда введите help")
@@ -135,8 +149,8 @@ func listTasks(args []string) error {
 			"ID:", id,
 			"\nОписание:", task.Description,
 			"\nСтатус:", task.statusToString(),
-			"\nДата создания:", task.CreatedAt.Format("15:04 02-01-2006"),
-			"\nДата обновления:", task.UpdatedAt.Format("15:04 02-01-2006"),
+			"\nДата создания:", task.CreatedAt.Format("15:04 02.01.2006"),
+			"\nДата обновления:", task.UpdatedAt.Format("15:04 02.01.2006"),
 		)
 		fmt.Println("--------------------------------")
 	}
@@ -159,7 +173,7 @@ func removeTask(args []string) error {
 	return deleteTask(id)
 }
 
-func updateTask(args []string) error {
+func updateDescriptionTask(args []string) error {
 	if len(args) == 0 {
 		return errors.New("отсутствует ID и новое описание для задачи")
 	} else if len(args) == 1 {
@@ -173,5 +187,35 @@ func updateTask(args []string) error {
 		return errors.New("ID должен быть целым положительным числом")
 	}
 
-	return putTask(id, args[1])
+	return patchDescriptionTask(id, args[1])
+}
+
+func markAsInProgress(args []string) error {
+	if len(args) == 0 {
+		return errors.New("отсутствует ID")
+	} else if len(args) > 1 {
+		return errors.New("слишком большое количество аргументов для команды mark-in-progress")
+	}
+
+	id, err := strconv.Atoi(args[0])
+	if err != nil || id < 1 {
+		return errors.New("ID должен быть целым положительным числом")
+	}
+
+	return patchStatusTask(id, TASK_STATUS_IN_PROGRESS)
+}
+
+func markAsDone(args []string) error {
+	if len(args) == 0 {
+		return errors.New("отсутствует ID")
+	} else if len(args) > 1 {
+		return errors.New("слишком большое количество аргументов для команды mark-done")
+	}
+
+	id, err := strconv.Atoi(args[0])
+	if err != nil || id < 1 {
+		return errors.New("ID должен быть целым положительным числом")
+	}
+
+	return patchStatusTask(id, TASK_STATUS_DONE)
 }

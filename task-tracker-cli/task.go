@@ -120,7 +120,7 @@ func deleteTask(id int) error {
 	return nil
 }
 
-func putTask(id int, description string) error {
+func patchDescriptionTask(id int, description string) error {
 	tasks, err := uploadFromFile()
 	if err != nil {
 		return err
@@ -131,6 +131,27 @@ func putTask(id int, description string) error {
 	}
 
 	tasks[id].Description = description
+	tasks[id].UpdatedAt = time.Now()
+
+	err = loadToFile(tasks)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func patchStatusTask(id int, status taskStatus) error {
+	tasks, err := uploadFromFile()
+	if err != nil {
+		return err
+	}
+
+	if _, ok := tasks[id]; !ok {
+		return fmt.Errorf("задачи с ID(%d) нет", id)
+	}
+
+	tasks[id].Status = status
 	tasks[id].UpdatedAt = time.Now()
 
 	err = loadToFile(tasks)
