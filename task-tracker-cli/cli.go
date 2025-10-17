@@ -39,6 +39,12 @@ func StartCLI() {
 				continue
 			}
 			fmt.Printf("Задача создана (ID: %d)\n", id)
+		case "list":
+			err := listTasks(cmds_args[1:])
+			if err != nil {
+				fmt.Println("Ошибка:", err)
+				continue
+			}
 		default:
 			fmt.Printf("Ошибка: неизвестная команда %v\n", cmd)
 			fmt.Println("Для отображения списка команда введите help")
@@ -78,9 +84,49 @@ func fieldsWithQuotes(str string) []string {
 
 func addTask(args []string) (int, error) {
 	if len(args) == 0 || len(args) > 1 {
-		return 0, errors.New("для команды add нужен один аргумент, заключенный в \"\"")
+		return 0, errors.New("для команды add нужен только один аргумент, заключенный в \"\"")
 	}
 
-	id, err := createTask(args[0])
+	id, err := postTask(args[0])
 	return id, err
+}
+
+func listTasks(args []string) error {
+	if len(args) > 1 {
+		return errors.New("слишком большое количество аргументов для команды list")
+	}
+
+	var tasks map[int]Task
+	var err error
+	if len(args) == 0 {
+		tasks, err = getTasks("")
+	} else {
+		switch args[0] {
+		case "todo":
+			tasks, err = getTasks(TASK_STATUS_TODO)
+		case "in-progress":
+			tasks, err = getTasks(TASK_STATUS_IN_PROGRESS)
+		case "done":
+			tasks, err = getTasks(TASK_STATUS_DONE)
+		default:
+			return errors.New("неизвестный аргумент для команды list")
+		}
+	}
+
+	if err != nil {
+		return err
+	}
+
+	for id, task := range tasks {
+		fmt.Println(
+			"ID:", id,
+			"\nОписание:", task.Description,
+			"\nСтатус:", task.statusToString(),
+			"\nДата создания:", task.CreatedAt.Format("15:04 02-01-2006"),
+			"\nДата обновления:", task.UpdatedAt.Format("15:04 02-01-2006"),
+		)
+		fmt.Println("--------------------------------")
+	}
+
+	return nil
 }

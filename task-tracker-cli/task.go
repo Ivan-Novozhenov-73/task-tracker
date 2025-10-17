@@ -26,7 +26,7 @@ func newTask(description string) *Task {
 	}
 }
 
-func createTask(description string) (int, error) {
+func postTask(description string) (int, error) {
 	tasks, err := uploadFromFile()
 	if err != nil {
 		return 0, err
@@ -45,9 +45,55 @@ func createTask(description string) (int, error) {
 
 	err = loadToFile(tasks)
 	if err != nil {
-		delete(tasks, id)
 		return 0, err
 	}
 
 	return id, nil
+}
+
+func getTasks(status taskStatus) (map[int]Task, error) {
+	tasks, err := uploadFromFile()
+	if err != nil {
+		return tasks, nil
+	}
+
+	switch status {
+	case TASK_STATUS_TODO:
+		temp := make(map[int]Task)
+		for id, task := range tasks {
+			if task.Status == TASK_STATUS_TODO {
+				temp[id] = task
+			}
+		}
+		return temp, nil
+	case TASK_STATUS_IN_PROGRESS:
+		temp := make(map[int]Task)
+		for id, task := range tasks {
+			if task.Status == TASK_STATUS_IN_PROGRESS {
+				temp[id] = task
+			}
+		}
+		return temp, nil
+	case TASK_STATUS_DONE:
+		temp := make(map[int]Task)
+		for id, task := range tasks {
+			if task.Status == TASK_STATUS_DONE {
+				temp[id] = task
+			}
+		}
+		return temp, nil
+	default:
+		return tasks, nil
+	}
+}
+
+func (task Task) statusToString() string {
+	switch task.Status {
+	case TASK_STATUS_IN_PROGRESS:
+		return "выполняется"
+	case TASK_STATUS_DONE:
+		return "выполнено"
+	default:
+		return "надо сделать"
+	}
 }
