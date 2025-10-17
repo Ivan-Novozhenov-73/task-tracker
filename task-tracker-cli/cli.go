@@ -58,7 +58,7 @@ func StartCLI() {
 				fmt.Println("Ошибка:", err)
 				continue
 			}
-			fmt.Println("Задача успешно обнавлена")
+			fmt.Println("Задача успешно обновлена")
 		case "mark-in-progress":
 			err := markAsInProgress(cmds_args[1:])
 			if err != nil {
@@ -73,6 +73,19 @@ func StartCLI() {
 				continue
 			}
 			fmt.Println("Статус задачи успешно обновлен на \"выполнено\"")
+		case "help":
+			fmt.Println("add <description> – добавляет новую задачу")
+			fmt.Println("list <\"\"|todo|in-progress|done> – выводит список задач на экран")
+			fmt.Println("\tесли аргумент todo, то выведутся задачи со статусом \"надо сделать\"")
+			fmt.Println("\tесли аргумент in-progress, то выведутся задачи со статусом \"выполняется\"")
+			fmt.Println("\tесли аргумент done, то выведутся задачи со статусом \"выполнено\"")
+			fmt.Println("\tесли аргумента нет, то выведутся все задачи")
+			fmt.Println("remove <id> – удаляет задачу по id")
+			fmt.Println("update <id> <description> – обновляет описание задачи по id")
+			fmt.Println("mark-in-progress <id> – обновляет статус задачи по id на \"выполняется\"")
+			fmt.Println("mark-done <id> – обновляет статус задачи по id на \"выполнено\"")
+			fmt.Println("help – выводит список команд")
+			fmt.Println("exit – завершение работы программы")
 		default:
 			fmt.Printf("Ошибка: неизвестная команда %v\n", cmd)
 			fmt.Println("Для отображения списка команда введите help")
