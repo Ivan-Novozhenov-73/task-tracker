@@ -1,6 +1,9 @@
 package task_tracker_cli
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type taskStatus string
 
@@ -96,4 +99,23 @@ func (task Task) statusToString() string {
 	default:
 		return "надо сделать"
 	}
+}
+
+func deleteTask(id int) error {
+	tasks, err := uploadFromFile()
+	if err != nil {
+		return nil
+	}
+
+	if _, ok := tasks[id]; !ok {
+		return fmt.Errorf("задачи с ID(%d) нет", id)
+	}
+	delete(tasks, id)
+
+	err = loadToFile(tasks)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

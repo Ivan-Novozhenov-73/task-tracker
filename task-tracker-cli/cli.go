@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -43,8 +44,14 @@ func StartCLI() {
 			err := listTasks(cmds_args[1:])
 			if err != nil {
 				fmt.Println("Ошибка:", err)
+			}
+		case "remove":
+			err := removeTask(cmds_args[1:])
+			if err != nil {
+				fmt.Println("Ошибка:", err)
 				continue
 			}
+			fmt.Println("Задача успешно удалена")
 		default:
 			fmt.Printf("Ошибка: неизвестная команда %v\n", cmd)
 			fmt.Println("Для отображения списка команда введите help")
@@ -129,4 +136,19 @@ func listTasks(args []string) error {
 	}
 
 	return nil
+}
+
+func removeTask(args []string) error {
+	if len(args) == 0 {
+		return errors.New("отсутствует ID")
+	} else if len(args) > 1 {
+		return errors.New("слишком большое количество аргументов для команды remove")
+	}
+
+	id, err := strconv.Atoi(args[0])
+	if err != nil || id < 1 {
+		return errors.New("ID должен быть целым положительным числом")
+	}
+
+	return deleteTask(id)
 }
